@@ -46,7 +46,7 @@ const saveNotesToStorage = async (username: string, notes: Note[]) => {
 // Add note
 export const addNote = createAsyncThunk(
   "notes/addNote",
-  async ({ username, title, content }: any) => {
+  async ({ username, title, content, image }: any) => {
     const storageKey = `notes_${username}`;
     const existing = JSON.parse(
       (await AsyncStorage.getItem(storageKey)) || "[]"
@@ -56,6 +56,7 @@ export const addNote = createAsyncThunk(
       id: Date.now().toString(),
       title,
       content,
+      image: image || null,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -70,16 +71,24 @@ export const addNote = createAsyncThunk(
 // Edit note
 export const updateNote = createAsyncThunk(
   "notes/updateNote",
-  async ({ username, id, title, content }: any) => {
+  async ({ username, id, title, content, image }: any) => {
     const storageKey = `notes_${username}`;
     const notes = JSON.parse((await AsyncStorage.getItem(storageKey)) || "[]");
 
     const updated = notes.map((note: Note) =>
-      note.id === id ? { ...note, title, content, updatedAt: Date.now() } : note
+      note.id === id
+        ? {
+            ...note,
+            title,
+            content,
+            image: image ?? note.image,
+            updatedAt: Date.now(),
+          }
+        : note
     );
 
     await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
-    return { id, title, content };
+    return { id, title, content, image };
   }
 );
 
@@ -121,11 +130,12 @@ const notesSlice = createSlice({
         state.notes.push(action.payload);
       })
       .addCase(updateNote.fulfilled, (state, action) => {
-        const { id, title, content } = action.payload;
-        const target = state.notes.find((n) => n.id === id);
+        const { id, title, content, image } = action.payload;
+        const target = state.notes.find((n: Note) => n.id === id);
         if (target) {
           target.title = title;
           target.content = content;
+          target.image = image;
           target.updatedAt = Date.now();
         }
       })

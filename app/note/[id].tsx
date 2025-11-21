@@ -41,20 +41,21 @@ export default function NoteEditor() {
 
   // pick from gallery
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission required", "Please allow photo access.");
-      return;
-    }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: false,
       quality: 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
     });
+    console.log("result", result);
+    if (result.canceled) {
+      Alert.alert("Permission required", "Please allow photo access.");
+      return;
+    }
+    console.log(result);
 
     if (!result.canceled) {
-      await saveImageToStorage(result.assets[0].uri);
+      const dest = await saveImageToStorage(result.assets[0].uri);
+      if (dest) setImage(dest); // ensures state updates
     }
   };
 
@@ -69,8 +70,9 @@ export default function NoteEditor() {
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: false,
       quality: 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
     });
+    console.log("result", result);
 
     if (!result.canceled) {
       await saveImageToStorage(result.assets[0].uri);
@@ -80,16 +82,32 @@ export default function NoteEditor() {
   // copy into documentDirectory so it persists across app restarts
   const saveImageToStorage = async (uri: string) => {
     try {
-      const filename = uri.split("/").pop() || `img_${Date.now()}.jpg`;
-      const dest = `${FileSystem.documentDirectory}${filename}`;
-      // copyAsync expects an object with { from, to }
+      // Make sure folder exists
+      const folder = FileSystem.documentDirectory + "note_images/";
+      console.log("folder", folder);
+      const folderInfo = await FileSystem.getInfoAsync(folder);
+      console.log("folderInfo", folderInfo);
+      if (!folderInfo.exists) {
+        await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
+      }
+
+      // Always generate unique filename
+      const filename = `img_${Date.now()}.jpg`;
+      console.log("filename", filename);
+      const dest = folder + filename;
+      console.log("dest", dest);
+
       await FileSystem.copyAsync({ from: uri, to: dest });
+
       setImage(dest);
+      return dest;
     } catch (err) {
       console.error("Failed to save image:", err);
       Alert.alert("Save failed", "Could not save image to storage.");
     }
   };
+  console.log(image);
+  
 
   const saveNote = async () => {
     if (!currentUser) return;

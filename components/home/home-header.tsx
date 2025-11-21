@@ -2,13 +2,15 @@ import { useAppSelector } from "@/src/redux/provider";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 
 interface TypesHeader {
   setSortModal: (value: boolean) => void;
   setProfileMenuVisible: (value: boolean) => void;
   onRefresh: () => void;
   notes: any[];
+  search: string;
+  setSearch: (value: string) => void;
 }
 
 const HomeHeader = ({
@@ -16,6 +18,8 @@ const HomeHeader = ({
   setProfileMenuVisible,
   onRefresh,
   notes,
+  search,
+  setSearch,
 }: TypesHeader) => {
   const router = useRouter();
   const { currentUser } = useAppSelector((s) => s.auth);
@@ -39,6 +43,23 @@ const HomeHeader = ({
           <Text className="text-gray-900 text-3xl font-bold mt-1">
             {currentUser}
           </Text>
+        </View>
+
+        {/* Search */}
+        <View className="bg-white rounded-full flex-row items-center px-3 mr-3 flex-1">
+          <Ionicons
+            name="search"
+            size={20}
+            color="#94a3b8"
+            style={{ marginRight: 8 }}
+          />
+          <TextInput
+            className="flex-1 h-10 text-base"
+            placeholder="Search notes..."
+            placeholderTextColor="#94a3b8"
+            onChangeText={setSearch}
+            value={search} // Make sure to add search state to your component
+          />
         </View>
 
         {/* 🔵 Add Note Button */}

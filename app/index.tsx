@@ -92,6 +92,8 @@ export default function HomePage() {
             onRefresh={onRefresh}
             notes={notes}
             setProfileMenuVisible={setProfileMenuVisible}
+            search={search}
+            setSearch={setSearch}
           />
 
           {/* NOTES LIST */}
