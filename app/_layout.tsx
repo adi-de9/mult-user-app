@@ -11,27 +11,26 @@ import "react-native-reanimated";
 import { Provider } from "react-redux";
 import "../global.css";
 
+export function AppLayout() {
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="note/[id]"
+        options={{ title: "Add Note", headerShown: true }}
+      />
+      <Stack.Screen name="(auth)/sign-in" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)/sign-up" options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Provider store={store}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="note/[id]"
-            options={{ title: "Add Note", headerShown: true }}
-          />
-          <Stack.Screen
-            name="(auth)/sign-in"
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="(auth)/sign-up"
-            options={{ headerShown: false }}
-          />
-        </Stack>
+        <AppLayout />
         <StatusBar style="auto" />
       </Provider>
     </ThemeProvider>

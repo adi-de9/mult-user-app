@@ -16,6 +16,11 @@ const ProfileModal = ({
   const router = useRouter();
   const dispatch = useAppDispatch();
 
+  const handleLogout = () => {
+    setProfileMenuVisible(false);
+    dispatch(logoutUser());
+  };
+
   return (
     <Modal
       visible={profileMenuVisible}
@@ -40,14 +45,7 @@ const ProfileModal = ({
           </TouchableOpacity>
 
           {/* Logout */}
-          <TouchableOpacity
-            className="py-4"
-            onPress={() => {
-              setProfileMenuVisible(false);
-              dispatch(logoutUser());
-              router.replace("/(auth)/sign-in");
-            }}
-          >
+          <TouchableOpacity className="py-4" onPress={handleLogout}>
             <Text className="text-red-600 text-base font-semibold">Logout</Text>
           </TouchableOpacity>
 

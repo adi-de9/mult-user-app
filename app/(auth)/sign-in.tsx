@@ -1,6 +1,7 @@
 import { loginUser, restoreSession } from "@/src/redux/authSlice";
 import { useAppDispatch, useAppSelector } from "@/src/redux/provider";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -34,6 +35,16 @@ export default function SignIn() {
       router.replace("/");
     }
   }, [isLoggedIn]);
+
+  const getAllKeys = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      console.log("keys", keys);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  getAllKeys();
 
   const handleLogin = async () => {
     if (!username) {

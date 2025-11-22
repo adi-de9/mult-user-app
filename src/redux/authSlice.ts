@@ -15,14 +15,6 @@ interface AuthState {
   error: string | null;
 }
 
-const initialState: AuthState = {
-  users: [],
-  isLoggedIn: false,
-  currentUser: null,
-  loading: false,
-  error: null,
-};
-
 // Restore stored users + current login session
 export const restoreSession = createAsyncThunk(
   "auth/restoreSession",
@@ -77,6 +69,16 @@ export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
   await AsyncStorage.removeItem("currentUser");
   return true;
 });
+
+
+const initialState: AuthState = {
+  users: [],
+  isLoggedIn: !!AsyncStorage.getItem("currentUser"),
+  currentUser: null,
+  loading: false,
+  error: null,
+};
+
 
 const authSlice = createSlice({
   name: "auth",

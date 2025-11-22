@@ -1,21 +1,13 @@
 // NoteEditor.tsx (quick patch using legacy FileSystem)
+import { useNoteImage } from "@/src/hooks/use-note-image";
 import { addNote, Note, updateNote } from "@/src/redux/notesSlice";
 import { useAppDispatch, useAppSelector } from "@/src/redux/provider";
-import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system/legacy"; // <= legacy import
-import * as ImagePicker from "expo-image-picker";
+import { Entypo, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import {
-  Alert,
-  Image,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function NoteEditor() {
@@ -34,80 +26,11 @@ export default function NoteEditor() {
   const [content, setContent] = useState<string>(
     isNew ? "" : existingNote?.content || ""
   );
-  const [image, setImage] = useState<string | null>(
+
+  const insets = useSafeAreaInsets();
+  const { image, pickImage, takePhoto, deleteImage } = useNoteImage(
     isNew ? null : existingNote?.image || null
   );
-  const insets = useSafeAreaInsets();
-
-  // pick from gallery
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: false,
-      quality: 1,
-      mediaTypes: "images",
-    });
-    console.log("result", result);
-    if (result.canceled) {
-      Alert.alert("Permission required", "Please allow photo access.");
-      return;
-    }
-    console.log(result);
-
-    if (!result.canceled) {
-      const dest = await saveImageToStorage(result.assets[0].uri);
-      if (dest) setImage(dest); // ensures state updates
-    }
-  };
-
-  // take a photo
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission required", "Please allow camera access.");
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: false,
-      quality: 1,
-      mediaTypes: "images",
-    });
-    console.log("result", result);
-
-    if (!result.canceled) {
-      await saveImageToStorage(result.assets[0].uri);
-    }
-  };
-
-  // copy into documentDirectory so it persists across app restarts
-  const saveImageToStorage = async (uri: string) => {
-    try {
-      // Make sure folder exists
-      const folder = FileSystem.documentDirectory + "note_images/";
-      console.log("folder", folder);
-      const folderInfo = await FileSystem.getInfoAsync(folder);
-      console.log("folderInfo", folderInfo);
-      if (!folderInfo.exists) {
-        await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
-      }
-
-      // Always generate unique filename
-      const filename = `img_${Date.now()}.jpg`;
-      console.log("filename", filename);
-      const dest = folder + filename;
-      console.log("dest", dest);
-
-      await FileSystem.copyAsync({ from: uri, to: dest });
-
-      setImage(dest);
-      return dest;
-    } catch (err) {
-      console.error("Failed to save image:", err);
-      Alert.alert("Save failed", "Could not save image to storage.");
-    }
-  };
-  console.log(image);
-  
 
   const saveNote = async () => {
     if (!currentUser) return;
@@ -146,16 +69,24 @@ export default function NoteEditor() {
       />
 
       {image && (
-        <Image
-          source={{ uri: image }}
-          style={{
-            width: "100%",
-            height: 200,
-            borderRadius: 10,
-            marginBottom: 12,
-          }}
-          resizeMode="cover"
-        />
+        <View className="relative">
+          <Image
+            source={{ uri: image }}
+            style={{
+              width: "100%",
+              height: 200,
+              borderRadius: 10,
+              marginBottom: 12,
+            }}
+            resizeMode="cover"
+          />
+          <TouchableOpacity
+            onPress={() => deleteImage()}
+            className="absolute top-3 right-3"
+          >
+            <Entypo name="cross" size={24} color="red" />
+          </TouchableOpacity>
+        </View>
       )}
 
       <View style={{ flexDirection: "row", gap: 12, marginBottom: 12 }}>

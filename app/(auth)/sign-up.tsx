@@ -56,6 +56,7 @@ export default function SignUp() {
           pin: finalPin,
         })
       );
+console.log(result);
 
       if (signUpUser.fulfilled.match(result)) {
         alert("Account created. Please login.");

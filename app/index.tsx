@@ -3,12 +3,14 @@ import HomeHeader from "@/components/home/home-header";
 import NotesCard from "@/components/home/note-card";
 import ProfileModal from "@/components/home/profile-modal";
 import SortModel from "@/components/home/sort-model";
+import { restoreSession } from "@/src/redux/authSlice";
 import { loadNotes } from "@/src/redux/notesSlice";
 import { useAppDispatch, useAppSelector } from "@/src/redux/provider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
-import { Redirect, useRootNavigationState, useRouter } from "expo-router";
+import { useRootNavigationState, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, RefreshControl, View } from "react-native";
+import { Alert, FlatList, RefreshControl, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomePage() {
@@ -29,13 +31,38 @@ export default function HomePage() {
 
   if (!navReady?.key) return null;
 
-  if (!isLoggedIn) {
-    return <Redirect href="/(auth)/sign-in" />;
-  }
+  useEffect(() => {
+    const userFetch = async () => {
+      const res = await dispatch(restoreSession());
+
+      if (!restoreSession.fulfilled.match(res)) return;
+
+      if (!res.payload.currentUser) {
+        Alert.alert("You are not logged in", "Please sign in to continue.", [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Sign In",
+            onPress: () => router.replace("/(auth)/sign-in"),
+          },
+        ]);
+      }
+    };
+    userFetch();
+  }, []);
 
   useEffect(() => {
     if (currentUser) dispatch(loadNotes(currentUser));
   }, [currentUser]);
+
+  const getAllKeys = async () => {
+    const keys = await AsyncStorage.getItem("currentUser");
+    const keys2 = await AsyncStorage.getItem("users");
+    console.log(keys, "keykey", keys2);
+  };
+  getAllKeys();
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -98,25 +125,21 @@ export default function HomePage() {
 
           {/* NOTES LIST */}
           <View className="flex-1 px-6 pt-4">
-            {/* NOTES EMPTY CHECK */}
-            {filteredNotes.length === 0 ? (
-              <EmptyNotes />
-            ) : (
-              <FlatList
-                data={filteredNotes}
-                renderItem={({ item }) => <NotesCard item={item} />}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
-                    colors={["#06b6d4"]}
-                  />
-                }
-                contentContainerStyle={{ paddingBottom: 20 }}
-              />
-            )}
+            <FlatList
+              data={filteredNotes}
+              renderItem={({ item }) => <NotesCard item={item} />}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={<EmptyNotes />}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#06b6d4"]}
+                />
+              }
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
           </View>
         </SafeAreaView>
 
