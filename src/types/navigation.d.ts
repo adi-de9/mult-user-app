@@ -3,11 +3,11 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 declare global {
   namespace ReactNavigation {
     interface RootParamList {
-      '(tabs)': NavigatorScreenParams<TabParamList>;
-      'note/[id]': { id: string };
-      'note/new': undefined;
-      '(auth)/sign-in': undefined;
-      '(auth)/sign-up': undefined;
+      "(tabs)": NavigatorScreenParams<TabParamList>;
+      "note/[id]": { id: string };
+      "note/new": undefined;
+      "(auth)/sign-in": { username?: string };
+      "(auth)/sign-up": undefined;
     }
 
     interface TabParamList {

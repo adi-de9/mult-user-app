@@ -1,3 +1,4 @@
+import { hash } from "@/utils/hash";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
@@ -5,6 +6,7 @@ interface User {
   username: string;
   password: string;
   pin: string; // 4-digit code
+  isAuth?: boolean;
 }
 
 interface AuthState {
@@ -25,6 +27,7 @@ export const restoreSession = createAsyncThunk(
       users,
       currentUser,
       isLoggedIn: !!currentUser,
+      isAuth: true,
     };
   }
 );
@@ -39,7 +42,17 @@ export const signUpUser = createAsyncThunk(
       throw new Error("Username already exists");
     }
 
-    const newUsers = [...users, { username, password, pin }];
+    const hashedPassword = await hash(password);
+    const hashedPin = await hash(pin);
+
+    const newUser = {
+      username,
+      password: hashedPassword,
+      pin: hashedPin,
+      isAuth: false,
+    };
+
+    const newUsers = [...users, newUser];
     await AsyncStorage.setItem("users", JSON.stringify(newUsers));
 
     return newUsers;
@@ -52,15 +65,45 @@ export const loginUser = createAsyncThunk(
   async ({ username, password, pin }: any) => {
     const users = JSON.parse((await AsyncStorage.getItem("users")) || "[]");
 
-    const user = users.find(
-      (u: any) =>
-        u.username === username && (u.password === password || u.pin === pin)
+    const user = users.find((u: User) => u.username === username);
+
+    if (!user) throw new Error("User not found");
+
+    const finalInput = password === "" ? pin : password;
+    const hashInput = await hash(finalInput);
+
+    if (user.password !== hashInput && user.pin !== hashInput) {
+      throw new Error("Invalid credentials");
+    }
+
+    // Mark this user as authenticated for the future
+    const updatedUsers = users.map((u: User) =>
+      u.username === username ? { ...u, isAuth: true } : u
     );
 
-    if (!user) throw new Error("Invalid credentials");
-
+    await AsyncStorage.setItem("users", JSON.stringify(updatedUsers));
     await AsyncStorage.setItem("currentUser", username);
 
+    return { username, users: updatedUsers };
+  }
+);
+
+export const switchUser = createAsyncThunk(
+  "auth/switchUser",
+  async (username: string, { rejectWithValue }) => {
+    const users = JSON.parse((await AsyncStorage.getItem("users")) || "[]");
+
+    const targetUser = users.find((u: User) => u.username === username);
+
+    if (!targetUser) {
+      return rejectWithValue("User not found");
+    }
+
+    if (!targetUser.isAuth) {
+      return rejectWithValue("RE_AUTH_REQUIRED");
+    }
+
+    await AsyncStorage.setItem("currentUser", username);
     return username;
   }
 );
@@ -70,7 +113,6 @@ export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
   return true;
 });
 
-
 const initialState: AuthState = {
   users: [],
   isLoggedIn: !!AsyncStorage.getItem("currentUser"),
@@ -78,7 +120,6 @@ const initialState: AuthState = {
   loading: false,
   error: null,
 };
-
 
 const authSlice = createSlice({
   name: "auth",
@@ -96,11 +137,16 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoggedIn = true;
-        state.currentUser = action.payload;
+        state.currentUser = action.payload.username;
+        state.users = action.payload.users;
       })
       .addCase(logoutUser.fulfilled, (state, action) => {
         state.isLoggedIn = false;
         state.currentUser = null;
+      })
+      .addCase(switchUser.fulfilled, (state, action) => {
+        state.currentUser = action.payload;
+        state.isLoggedIn = true;
       });
   },
 });

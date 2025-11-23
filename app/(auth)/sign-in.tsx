@@ -1,10 +1,9 @@
-import { loginUser, restoreSession } from "@/src/redux/authSlice";
+import { loginUser } from "@/src/redux/authSlice";
 import { useAppDispatch, useAppSelector } from "@/src/redux/provider";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -23,28 +22,7 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { loading, isLoggedIn } = useAppSelector((state) => state.auth);
-  const [pin, setPin] = useState("");
-
-  useEffect(() => {
-    dispatch(restoreSession());
-  }, []);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      router.replace("/");
-    }
-  }, [isLoggedIn]);
-
-  const getAllKeys = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      console.log("keys", keys);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-  getAllKeys();
+  const { loading } = useAppSelector((state) => state.auth);
 
   const handleLogin = async () => {
     if (!username) {
@@ -52,16 +30,15 @@ export default function SignIn() {
       return;
     }
 
-    if (!password && !pin) {
-      alert("Enter password or 4-digit PIN");
+    if (!password) {
+      alert("Enter password");
       return;
     }
 
     const result = await dispatch(
       loginUser({
         username,
-        password: password || "",
-        pin: pin || "",
+        password,
       })
     );
 
@@ -122,7 +99,7 @@ export default function SignIn() {
               {/* Password Input */}
               <View className="mb-6">
                 <Text className="text-gray-700 font-semibold mb-2 text-sm">
-                  Password
+                  Password / Pin
                 </Text>
                 <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
                   <Ionicons
@@ -148,35 +125,6 @@ export default function SignIn() {
                       color="#6b7280"
                     />
                   </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Divider */}
-              <View className="flex-row items-center mb-6">
-                <View className="flex-1 h-px bg-gray-300" />
-                <Text className="mx-4 text-gray-500 text-sm">OR</Text>
-                <View className="flex-1 h-px bg-gray-300" />
-              </View>
-
-              {/* Password Input */}
-              <View className="mb-6">
-                <Text className="text-gray-700 font-semibold mb-2 text-sm">
-                  4-Digit PIN (optional login)
-                </Text>
-                <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={20}
-                    color="#6b7280"
-                  />
-                  <TextInput
-                    className="flex-1 ml-3 text-gray-800 text-base"
-                    placeholder="1234"
-                    value={pin}
-                    keyboardType="number-pad"
-                    maxLength={4}
-                    onChangeText={setPin}
-                  />
                 </View>
               </View>
 

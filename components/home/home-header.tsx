@@ -26,7 +26,7 @@ const HomeHeader = ({
 
   return (
     <View
-      className="px-5 pt-10 pb-5 bg-gradient-to-b from-gray-50 to-white"
+      className="px-5 pt-12 pb-2 bg-gradient-to-b from-gray-50 to-white"
       style={{
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
@@ -85,95 +85,56 @@ const HomeHeader = ({
         </View>
       </View>
 
-      {/* Search Bar */}
-      {notes.length > 0 && (
-        <View className="mb-2">
-          {/* Search Bar */}
-          <View
-            className="bg-white rounded-2xl flex-row items-center px-4 py-3 mb-1"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-              elevation: 2,
-            }}
-          >
-            <Ionicons
-              name="search"
-              size={20}
-              color="#94a3b8"
-              style={{ marginRight: 12 }}
-            />
-            <TextInput
-              className="flex-1 text-base text-gray-800"
-              placeholder="Search notes..."
-              placeholderTextColor="#94a3b8"
-              onChangeText={setSearch}
-              value={search}
-            />
-            {search.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearch("")}
-                className="ml-2"
-                activeOpacity={0.7}
-              >
-                <Ionicons name="close-circle" size={20} color="#94a3b8" />
-              </TouchableOpacity>
-            )}
+      {/* Search, Sort, and Notes Count Row */}
+
+      <View
+        className="flex-row items-center bg-white rounded-2xl p-3"
+        style={{
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 2,
+        }}
+      >
+        {/* Search Bar */}
+        <View className="flex-row items-center flex-1 bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 mr-3">
+          <Ionicons name="search" size={20} color="#94a3b8" />
+          <TextInput
+            className="flex-1 text-base text-gray-800 ml-2"
+            placeholder="Search notes..."
+            placeholderTextColor="#94a3b8"
+            onChangeText={setSearch}
+            value={search}
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch("")} activeOpacity={0.7}>
+              <Ionicons name="close-circle" size={20} color="#94a3b8" />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Sort Button */}
+        <TouchableOpacity
+          onPress={() => setSortModal(true)}
+          className="bg-gray-50 rounded-xl p-2.5 mr-3"
+          activeOpacity={0.7}
+        >
+          <Ionicons name="swap-vertical" size={20} color="#06b6d4" />
+        </TouchableOpacity>
+
+        {/* Notes Count */}
+        <View className="flex-row items-center">
+          <View className="bg-cyan-50 rounded-full p-2 mr-2">
+            <Ionicons name="documents-outline" size={18} color="#06b6d4" />
           </View>
-
-          {/* Stats and Actions Bar */}
-          <View
-            className="flex-row items-center bg-white rounded-2xl p-4"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.05,
-              shadowRadius: 8,
-              elevation: 2,
-            }}
-          >
-            {/* Notes Count */}
-            <View className="flex-row items-center flex-1">
-              <View className="bg-cyan-50 rounded-full p-2 mr-3">
-                <Ionicons name="documents-outline" size={18} color="#06b6d4" />
-              </View>
-              <View>
-                <Text className="text-gray-900 font-bold text-base">
-                  {notes.length}
-                </Text>
-                <Text className="text-gray-500 text-xs font-medium">
-                  {notes.length === 1 ? "Note" : "Notes"}
-                </Text>
-              </View>
-            </View>
-
-            {/* Action Buttons */}
-            {notes.length > 0 && (
-              <View className="flex-row items-center">
-                {/* Sort Button */}
-                <TouchableOpacity
-                  onPress={() => setSortModal(true)}
-                  className="bg-gray-50 rounded-xl p-2.5 mr-2"
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="swap-vertical" size={20} color="#06b6d4" />
-                </TouchableOpacity>
-
-                {/* Refresh Button */}
-                <TouchableOpacity
-                  onPress={onRefresh}
-                  className="bg-cyan-50 rounded-xl p-2.5"
-                  activeOpacity={0.7}
-                >
-                  <Ionicons name="refresh" size={20} color="#06b6d4" />
-                </TouchableOpacity>
-              </View>
-            )}
+          <View>
+            <Text className="text-gray-900 font-bold text-base">
+              {notes.length}
+            </Text>
           </View>
         </View>
-      )}
+      </View>
     </View>
   );
 };

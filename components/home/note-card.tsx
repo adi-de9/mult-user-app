@@ -1,7 +1,6 @@
 import { deleteNote } from "@/src/redux/notesSlice";
 import { useAppDispatch, useAppSelector } from "@/src/redux/provider";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
@@ -44,25 +43,12 @@ const NotesCard = ({ item }: any) => {
           elevation: 5,
         }}
       >
-        {item.image ? (
+        {item.image && (
           <Image
             source={{ uri: item.image }}
             className="w-full h-48"
             resizeMode="cover"
           />
-        ) : (
-          <LinearGradient
-            colors={["#06b6d4", "#0284c7", "#2563eb"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="w-full h-48 items-center justify-center"
-          >
-            <Ionicons
-              name="document-text-outline"
-              size={64}
-              color="rgba(255,255,255,0.3)"
-            />
-          </LinearGradient>
         )}
 
         <View className="p-4">
