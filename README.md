@@ -11,7 +11,16 @@ A secure, multi-user note-taking application built with React Native, Expo, and 
 - **Offline-First**: Works without an internet connection
 - **Cross-Platform**: Runs on iOS, Android, and Web
 
+## VIDEO TUTORIAL
+
+https://www.youtube.com/watch?v=zgz6kaqtyIc
+
+## VIDEO TUTORIAL
+
+live link: https://expo.dev/accounts/kilefex/projects/multy-note/builds/badfe47c-d642-423d-8d51-810c8765b17c
+
 ## 🛠️ Setup Instructions
+
 
 ### Prerequisites
 
